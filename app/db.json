@@ -1,0 +1,24 @@
+{
+  "categorias": [
+    {
+      "id": 1,
+      "nombre": "Electr\u00f3nica"
+    },
+    {
+      "id": 2,
+      "nombre": "Jardiner\u00eda Integracion"
+    }
+  ],
+  "productos": [
+    {
+      "id": 101,
+      "nombre": "Laptop",
+      "categoria_id": 1
+    },
+    {
+      "id": 102,
+      "nombre": "Tijeras",
+      "categoria_id": 2
+    }
+  ]
+}
