@@ -1,7 +1,8 @@
 import json
+import os
 from typing import Dict, Any, List
 
-DB_FILE = "app/db.json"
+DB_FILE = os.environ.get("APP_DB_FILE", "app/db.json")
 
 def _load_db() -> Dict[str, Any]:
     """Carga los datos del archivo JSON."""

@@ -5,15 +5,6 @@ import json
 
 client = TestClient(app)
 
-# Restaura el estado de la DB al estado original después de cada prueba
-def setup_function():
-    data_inicial = {"categorias": [{"id": 1, "nombre": "Electrónica"}],
-                    "productos": [{"id": 101, "nombre": "Laptop", "categoria_id": 1}]}
-    crud._save_db(data_inicial)
-    print("\n--- DB RESTAURADA (Estado Inicial) ---")
-    print(json.dumps(data_inicial, indent=4))
-    print("--------------------------------------")
-
 def test_integration_create_cat_and_product():
     """
     Verifica que las rutas POST de /categorias y /productos funcionen juntas
@@ -41,3 +32,25 @@ def test_integration_create_cat_and_product():
     # Assertions finales
     assert producto_creado["nombre"] == "Tijeras"
     assert producto_creado["categoria_id"] == categoria_id
+
+
+def test_integration_categoria_se_guarda_y_se_recupera(isolated_db):
+    respuesta = client.post("/categorias", params={"nombre": "Libros"})
+
+    assert respuesta.status_code == 200
+    categoria = respuesta.json()
+    assert categoria == {"id": 1, "nombre": "Libros"}
+    assert json.loads(isolated_db.read_text(encoding="utf-8"))["categorias"] == [categoria]
+    assert client.get("/categorias").json() == [categoria]
+
+
+def test_integration_productos_incrementan_id_y_persisten(isolated_db):
+    categoria = client.post("/categorias", params={"nombre": "Papelería"}).json()
+    primero = client.post("/productos", params={"nombre": "Lápiz", "categoria_id": categoria["id"]})
+    segundo = client.post("/productos", params={"nombre": "Cuaderno", "categoria_id": categoria["id"]})
+
+    assert primero.status_code == segundo.status_code == 200
+    assert [primero.json()["id"], segundo.json()["id"]] == [101, 102]
+    productos = json.loads(isolated_db.read_text(encoding="utf-8"))["productos"]
+    assert productos == [primero.json(), segundo.json()]
+    assert client.get("/productos").json() == productos

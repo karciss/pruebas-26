@@ -15,10 +15,9 @@ def create_categoria_route(nombre: str):
     Llama a la lógica de negocio (CRUD) para crear una categoría.
     """
     return crud.create_categoria_db(nombre)
-# agregar esto despues del primer commit
-""" @app.get("/productos")
+@app.get("/productos")
 def get_all_productos_route():
-    return crud.get_productos() """
+    return crud.get_productos()
 
 @app.post("/productos")
 def create_producto_route(nombre: str, categoria_id: int):

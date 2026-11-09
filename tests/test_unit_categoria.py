@@ -1,5 +1,6 @@
 from unittest.mock import patch
 from app.crud import create_categoria_db 
+from app.crud import create_producto_db
 import json
 # Datos simulados que el mock devolverá al CRUD
 MOCK_DB_DATA = {
@@ -38,3 +39,26 @@ def test_unit_create_categoria_logic():
         # 4. Verificar el contenido exacto
         assert any(c['nombre'] == nombre_cat for c in data_guardada['categorias'])
 # Al salir del bloque 'with', los parches se eliminan automáticamente
+
+
+def test_unit_categoria_usa_id_mayor_aunque_no_sea_la_ultima():
+    db = {"categorias": [{"id": 8, "nombre": "A"}, {"id": 3, "nombre": "B"}],
+          "productos": []}
+    with patch('app.crud._load_db', return_value=db), \
+            patch('app.crud._save_db') as mock_save:
+        categoria = create_categoria_db("Nueva")
+
+    assert categoria == {"id": 9, "nombre": "Nueva"}
+    mock_save.assert_called_once_with(db)
+    assert db["categorias"][-1] == categoria
+
+
+def test_unit_producto_rechaza_categoria_inexistente_sin_guardar():
+    db = {"categorias": [{"id": 1, "nombre": "A"}], "productos": []}
+    with patch('app.crud._load_db', return_value=db), \
+            patch('app.crud._save_db') as mock_save:
+        resultado = create_producto_db("Producto", categoria_id=99)
+
+    assert resultado == {"error": "Categoría no encontrada"}
+    assert db["productos"] == []
+    mock_save.assert_not_called()

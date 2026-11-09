@@ -10,6 +10,8 @@ jobs:
     test_app:
         name: Ejecutar pruebas Python
         runs-on: ubuntu-latest
+        env:
+            PYTHONDONTWRITEBYTECODE: '1'
         steps:
             - name: Checkout del codigo
               uses: actions/checkout@v5
@@ -24,7 +26,8 @@ jobs:
             - name: Ejecutar pruebas
               run: |
                   echo "Empezando con pruebas de python"
-                  python -m pytest --rootdir . -s
+                  python -m pytest -q
+                  git diff --exit-code -- app/db.json
             - name: Reporte Final
               run: |
                   echo "Pruebas finalizadas"
